@@ -298,5 +298,3 @@ class Graph:
 
         # Return the path (in forward order from start_vertex to end_vertex)
         return path
-
-
