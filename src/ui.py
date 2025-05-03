@@ -20,6 +20,7 @@ RANDOM_GRAPH = "11"
 COPY_GRAPH = "12"
 CHANGE_GRAPH = "13"
 BACKWARD_BFS = "14"
+DIJKSTRA = "15"
 
 
 class UI:
@@ -44,6 +45,7 @@ class UI:
         print("12. Copy graph")
         print("13. Change graph")
         print("14. Find shortest path using backward BFS")
+        print("15. Find lowest cost path using Dijkstra's algorithm")
         print("0. Exit")
         print("--------------------")
 
@@ -219,6 +221,17 @@ class UI:
                         path = self.__graph.backward_bfs(start_vertex, end_vertex)
                         if path is not None:
                             print(f"Path from {start_vertex} to {end_vertex}: {path}, length: {len(path) - 1}")
+                        else:
+                            print(f"No path from {start_vertex} to {end_vertex}")
+                    else:
+                        print("Invalid vertices!")
+                elif option == DIJKSTRA:
+                    start_vertex = int(input("Start vertex: "))
+                    end_vertex = int(input("End vertex: "))
+                    if self.__graph.is_vertex(start_vertex) and self.__graph.is_vertex(end_vertex):
+                        path, cost = self.__graph.dijkstra(start_vertex, end_vertex)
+                        if path is not None:
+                            print(f"Path from {start_vertex} to {end_vertex}: {path}, cost: {cost}")
                         else:
                             print(f"No path from {start_vertex} to {end_vertex}")
                     else:

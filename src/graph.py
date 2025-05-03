@@ -1,4 +1,5 @@
 import copy
+import heapq
 
 
 class Graph:
@@ -229,7 +230,7 @@ class Graph:
         """
         Complexity - Theta(1)
         Checks if a vertex is in the graph
-        :param vertex:
+        :param vertex: the vertex to check
         :return: True if the vertex is in the graph, False otherwise
         """
         return vertex in self.__vertices
@@ -247,13 +248,6 @@ class Graph:
         self.__edge_count = 0
 
     def backward_bfs(self, start_vertex, end_vertex):
-        """
-        Complexity - O(n)
-        Performs a backward BFS from the end vertex to the start vertex
-        :param start_vertex: the start vertex
-        :param end_vertex: the end vertex
-        :return: the path from start_vertex to end_vertex
-        """
         # Check if both start and end vertices exist in the graph
         if not self.is_vertex(start_vertex) or not self.is_vertex(end_vertex):
             return None  # Return None if either vertex is not in the graph
@@ -298,3 +292,76 @@ class Graph:
 
         # Return the path (in forward order from start_vertex to end_vertex)
         return path
+
+    def dijkstra(self, start_vertex, end_vertex):
+        """
+        Finds the lowest cost walk between two vertices using Dijkstra's algorithm.
+        :param start_vertex: the starting vertex
+        :param end_vertex: the ending vertex
+        :return: a tuple (path, cost) where path is the list of vertices in the lowest cost walk
+                 and cost is the total cost of the walk. Returns None if no path exists.
+        """
+        # Check if both start and end vertices exist in the graph
+        if not self.is_vertex(start_vertex) or not self.is_vertex(end_vertex):
+            return None  # Return None if either vertex is not in the graph
+
+        # Priority queue to store (current_cost, current_vertex)
+        # The queue ensures that the vertex with the smallest cost is processed first
+        priority_queue = [(0, start_vertex)]
+
+        # Dictionary to store the minimum cost to reach each vertex
+        # Initialize all vertices with infinity cost, except the start vertex which has a cost of 0
+        dist_dict = {vertex: float('inf') for vertex in self.__vertices}
+        dist_dict[start_vertex] = 0
+
+        # Dictionary to store the predecessor of each vertex
+        # This is used to reconstruct the path after the algorithm finishes
+        prev_dict = {start_vertex: None}
+
+        # Process the priority queue until it is empty
+        while priority_queue:
+            # Extract the vertex with the smallest cost from the queue
+            current_cost, current_vertex = heapq.heappop(priority_queue)
+
+            # If the current vertex is the end vertex, we can stop early
+            if current_vertex == end_vertex:
+                break
+
+            # Iterate through all neighbors of the current vertex
+            for neighbor in self.parse_outbound(current_vertex):
+                # Get the cost of the edge from the current vertex to the neighbor
+                cost = self.get_cost(current_vertex, neighbor)
+
+                # Calculate the new cost to reach the neighbor
+                new_cost = current_cost + cost
+
+                # If the new cost is smaller than the previously recorded cost for the neighbor
+                if new_cost < dist_dict[neighbor]:
+                    # Update the minimum cost to reach the neighbor
+                    dist_dict[neighbor] = new_cost
+
+                    # Update the predecessor of the neighbor to the current vertex
+                    prev_dict[neighbor] = current_vertex
+
+                    # Add the neighbor to the priority queue with the updated cost
+                    heapq.heappush(priority_queue, (new_cost, neighbor))
+
+        # If the end vertex is unreachable (its cost is still infinity), return None
+        if dist_dict[end_vertex] == float('inf'):
+            return None
+
+        # Reconstruct the path from the start vertex to the end vertex
+        path = []
+        current_vertex = end_vertex
+        while current_vertex is not None:
+            # Add the current vertex to the path
+            path.append(current_vertex)
+
+            # Move to the predecessor of the current vertex
+            current_vertex = prev_dict[current_vertex]
+
+        # Reverse the path to get it in the correct order (from start to end)
+        path.reverse()
+
+        # Return the reconstructed path and the total cost of the walk
+        return path, dist_dict[end_vertex]
